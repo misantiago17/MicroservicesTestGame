@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ranking-service
+spec:
+  replicas: 1  # Ajuste conforme necessário
+  selector:
+    matchLabels:
+      app: ranking-service
+  template:
+    metadata:
+      labels:
+        app: ranking-service
+    spec:
+      containers:
+        - name: ranking-service
+          image: ranking-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081  # A porta do serviço de ranking
+          env:
+            - name: PORT
+              value: "8081"

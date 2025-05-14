@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: score-service
+spec:
+  replicas: 1  # Você pode ajustar esse número conforme necessário
+  selector:
+    matchLabels:
+      app: score-service
+  template:
+    metadata:
+      labels:
+        app: score-service
+    spec:
+      containers:
+        - name: score-service
+          image: score-service  # A imagem que você construiu
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080  # A porta do serviço de pontuação
+          env:
+            - name: PORT
+              value: "8080"

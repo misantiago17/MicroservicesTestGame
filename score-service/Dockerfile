@@ -18,4 +18,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # Execute o arquivo principal do Ktor
-CMD ["java", "-jar", "build/libs/seu-jar-application.jar"]
+CMD ["java", "-jar", "build/libs/score-service-all.jar"]
