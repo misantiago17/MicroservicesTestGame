@@ -15,30 +15,33 @@ import kotlinx.serialization.json.Json
 
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
-        }
-        routing {
-            get("/") {
-                call.respondText("Servidor do jogo está online!")
-            }
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+        .start(wait = true)
+}
 
-            get("/status") {
-                call.respond(StatusResponse("Tudo certo por aqui!"))
-            }
-
-            post("/score"){
-                val score = call.receive<Score>()
-                println("Jogador: ${score.player} fez ${score.points} pontos!")
-                call.respond(HttpStatusCode.OK, "Pontuação recebida!")
-            }
+fun Application.module(){
+    install(ContentNegotiation) {
+        json(Json {
+            prettyPrint = true
+            isLenient = true
+            ignoreUnknownKeys = true
+        })
+    }
+    routing {
+        get("/") {
+            call.respondText("Servidor do jogo está online!")
         }
-    }.start(wait = true)
+
+        get("/status") {
+            call.respond(StatusResponse("Tudo certo por aqui!"))
+        }
+
+        post("/score"){
+            val score = call.receive<Score>()
+            println("Jogador: ${score.player} fez ${score.points} pontos!")
+            call.respond(HttpStatusCode.OK, "Pontuação recebida!")
+        }
+    }
 }
 
 @Serializable
