@@ -1,7 +1,5 @@
 package com.example
 
-import com.fasterxml.jackson.databind.*
-import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*

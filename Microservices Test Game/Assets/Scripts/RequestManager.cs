@@ -9,6 +9,7 @@ public class RequestManager : MonoBehaviour
     public Button syncButton;
     public Button asyncButton;
     public Button scoreButton;
+    public Button rankingButton;
 
     public TextMeshProUGUI feedbackText;
 
@@ -18,11 +19,12 @@ public class RequestManager : MonoBehaviour
         syncButton.onClick.AddListener(SendSyncRequest);
         asyncButton.onClick.AddListener(() => StartCoroutine(SendAsyncRequest()));
         scoreButton.onClick.AddListener(() => StartCoroutine(SendScoreRequest("Michelle", 1500)));
+        rankingButton.onClick.AddListener(() => StartCoroutine(GetRanking()));
     }
 
     void SendSyncRequest()
     {
-        UnityWebRequest request = UnityWebRequest.Get("http://URL:5000/sync");
+        UnityWebRequest request = UnityWebRequest.Get("http://localhost:8080/status");
         request.SendWebRequest();
 
         feedbackText.text = "Enviado (sincrono)!";
@@ -30,7 +32,7 @@ public class RequestManager : MonoBehaviour
 
     IEnumerator SendAsyncRequest()
     {
-        UnityWebRequest request = UnityWebRequest.Get("http://URL:5000/async");
+        UnityWebRequest request = UnityWebRequest.Get("http://localhost:8080/status");
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
@@ -45,11 +47,12 @@ public class RequestManager : MonoBehaviour
 
     IEnumerator SendScoreRequest(string player, int points)
     {
-        ScoreData score = new ScoreData(player, points);
+        PlayerData score = new PlayerData(player, points);
         string jsonData = JsonUtility.ToJson(score);
 
-        UnityWebRequest request = UnityWebRequest.PostWwwForm("http://localhost:8080/score", "POST");
+        UnityWebRequest request = new UnityWebRequest("http://localhost:8080/score", "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
+        
         request.uploadHandler = new UploadHandlerRaw(jsonToSend);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
@@ -65,5 +68,28 @@ public class RequestManager : MonoBehaviour
             feedbackText.text = "Erro ao enviar pontuação: " + request.error;
         }
     }
+
+    IEnumerator GetRanking()
+    {
+        UnityWebRequest request = UnityWebRequest.Get("http://localhost:8081/ranking");
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string json = "{\"players\":" + request.downloadHandler.text + "}";
+            PlayerList ranking = JsonUtility.FromJson<PlayerList>(json);
+
+            feedbackText.text = "Ranking:\n";
+            foreach (PlayerData player in ranking.players)
+            {
+                feedbackText.text += $"{player.player} - {player.points} pts\n";
+            }
+        }
+        else
+        {
+            feedbackText.text = "Erro ao buscar ranking: " + request.error;
+        }
+    }
+
 
 }
